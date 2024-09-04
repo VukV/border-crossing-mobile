@@ -1,22 +1,22 @@
-import 'package:border_crossing_mobile/screens/auth/register_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/widgets/bc_button.dart';
+import 'package:border_crossing_mobile/screens/auth/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void test() {
+  void login() {
     print('Test login');
   }
 
   void navigateToRegisterScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+      MaterialPageRoute(builder: (context) => RegisterScreen()),
     );
   }
 
@@ -40,7 +40,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               TextField(
-                controller: usernameController,
+                controller: emailController,
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               BCButton(
-                onPressed: test,
+                onPressed: login,
                 text: 'Login',
               ),
               const Spacer(),

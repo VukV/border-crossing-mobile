@@ -21,7 +21,7 @@ class BCButton extends StatelessWidget {
         backgroundColor: Colors.deepPurple[400],
         fixedSize: size,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
       child: Text(

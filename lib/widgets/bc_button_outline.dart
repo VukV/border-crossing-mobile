@@ -24,7 +24,7 @@ class BCButtonOutline extends StatelessWidget {
         ),
         fixedSize: size,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
       child: Text(
