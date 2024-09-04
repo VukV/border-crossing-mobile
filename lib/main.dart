@@ -1,5 +1,5 @@
 import 'package:border_crossing_mobile/screens/auth/login_screen.dart';
-import 'package:border_crossing_mobile/screens/main_screen.dart';
+import 'package:border_crossing_mobile/screens/main/main_screen.dart';
 import 'package:border_crossing_mobile/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
