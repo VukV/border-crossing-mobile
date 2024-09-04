@@ -4,12 +4,14 @@ import 'package:border_crossing_mobile/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(BorderCrossingApp());
+  runApp(const BorderCrossingApp());
 }
 
 class BorderCrossingApp extends StatefulWidget {
+  const BorderCrossingApp({super.key});
+
   @override
-  _BorderCrossingAppState createState() => _BorderCrossingAppState();
+  State<BorderCrossingApp> createState() => _BorderCrossingAppState();
 }
 
 class _BorderCrossingAppState extends State<BorderCrossingApp> {
@@ -34,8 +36,9 @@ class _BorderCrossingAppState extends State<BorderCrossingApp> {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
+        primarySwatch: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.grey[300],
+
       ),
       home: _isLoggedIn ? const MainScreen() : LoginScreen(),
     );
