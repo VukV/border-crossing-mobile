@@ -1,7 +1,7 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'https://';
 
-  static const String login = '$baseUrl/auth/login';
-  static const String register = '$baseUrl/auth/register';
+  static const String login = '$baseUrl/api/auth/login';
+  static const String register = '$baseUrl/api/auth/register';
 
 }

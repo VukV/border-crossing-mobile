@@ -62,70 +62,73 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 100),
-              const Center(
-                child: Icon(
-                  Icons.share_location,
-                  size: 100,
-                  color: Colors.deepPurple,
-                ),
-              ),
-              const SizedBox(height: 48),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 32),
-              isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : BCButton(
-                text: 'Login',
-                onPressed: _login,
-              ),
-              const Spacer(),
-              Center(
-                child: Text.rich(
-                  style: const TextStyle(fontSize: 16),
-                  TextSpan(
-                    text: "Don't have an account? ",
-                    children: [
-                      TextSpan(
-                        text: 'Register now.',
-                        style: const TextStyle(
-                          color: Colors.deepPurple,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.deepPurple,
-                          fontWeight: FontWeight.bold
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            navigateToRegisterScreen(context);
-                          },
-                      ),
-                    ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 100),
+                const Center(
+                  child: Icon(
+                    Icons.share_location,
+                    size: 100,
+                    color: Colors.deepPurple,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 48),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 32),
+                isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : BCButton(
+                  text: 'Login',
+                  onPressed: _login,
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text.rich(
+                    style: const TextStyle(fontSize: 16),
+                    TextSpan(
+                      text: "Don't have an account? ",
+                      children: [
+                        TextSpan(
+                          text: 'Register now.',
+                          style: const TextStyle(
+                              color: Colors.deepPurple,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.deepPurple,
+                              fontWeight: FontWeight.bold
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              navigateToRegisterScreen(context);
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -54,6 +54,7 @@ class AuthService {
         return Future.error(BCError.fromJson(error));
       }
     } catch (e) {
+      print(e);
       return Future.error(BCError(message: 'Unexpected error during login'));
     }
   }
