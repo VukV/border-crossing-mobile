@@ -1,3 +1,4 @@
+import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/widgets/bc_button.dart';
@@ -33,9 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (e is BCError) {
-        _showSnackbar(e.message);
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
       } else {
-        _showSnackbar('An unknown error occurred.');
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
       }
     } finally {
       setState(() {
@@ -48,14 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterScreen()),
-    );
-  }
-
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
     );
   }
 

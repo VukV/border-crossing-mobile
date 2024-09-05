@@ -1,17 +1,57 @@
+import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
+import '../../models/error.dart';
+import '../../services/auth_service.dart';
 import '../../widgets/bc_button.dart';
 
-class RegisterScreen extends StatelessWidget {
-  RegisterScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController repeatPasswordController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool isLoading = false;
 
-  void register() {
-    print('Test register');
+  Future<void> _register() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final email = emailController.text;
+      final password = passwordController.text;
+      final repeatPassword = repeatPasswordController.text;
+      final firstName = firstNameController.text;
+      final lastName = lastNameController.text;
+
+      await _authService.register(email, password, repeatPassword, firstName, lastName);
+      if (mounted) {
+        SnackbarUtils.showSnackbar(context, 'Registered successfully. You may login.', Colors.deepPurple[400]);
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -94,9 +134,11 @@ class RegisterScreen extends StatelessWidget {
                 obscureText: true,
               ),
               const SizedBox(height: 32.0),
-              BCButton(
-                onPressed: register,
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : BCButton(
                 text: 'Register',
+                onPressed: _register,
               ),
             ],
           ),

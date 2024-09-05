@@ -1,4 +1,5 @@
 import 'package:border_crossing_mobile/services/auth_service.dart';
+import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:border_crossing_mobile/widgets/bc_button_outline.dart';
 import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/models/user/profile.dart';
@@ -49,16 +50,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      _showSnackbar("Unexpected error. Couldn't logout");
+      if (mounted) {
+        SnackbarUtils.showSnackbar(context, "Unexpected error. Couldn't logout");
+      }
     }
-  }
-
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
   }
 
   @override

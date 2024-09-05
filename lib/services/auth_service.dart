@@ -29,6 +29,13 @@ class AuthService {
   }
 
   Future<User?> login(String email, String password) async {
+    if (email.isEmpty) {
+      return Future.error(BCError(message: 'Email is not provided.'));
+    }
+    if (password.isEmpty) {
+      return Future.error(BCError(message: 'Password is not provided.'));
+    }
+
     final url = Uri.parse(ApiEndpoints.login);
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({'email': email, 'password': password});
@@ -54,8 +61,39 @@ class AuthService {
         return Future.error(BCError.fromJson(error));
       }
     } catch (e) {
-      print(e);
-      return Future.error(BCError(message: 'Unexpected error during login'));
+      return Future.error(BCError(message: 'Unexpected error during login.'));
+    }
+  }
+
+  Future<void> register(String email, String password, String repeatPassword, String firstName, String lastName) async {
+    if (email.isEmpty || password.isEmpty || repeatPassword.isEmpty || firstName.isEmpty || lastName.isEmpty) {
+      return Future.error(BCError(message: 'You need to fill in registration form.'));
+    }
+    if (password != repeatPassword) {
+      return Future.error(BCError(message: 'Passwords do not match.'));
+    }
+
+    final url = Uri.parse(ApiEndpoints.register);
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({
+      'email': email,
+      'password': password,
+      'repeatPassword': repeatPassword,
+      'firstName': firstName,
+      'lastName' : lastName
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final error = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(error));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Unexpected error during login.'));
     }
   }
 
