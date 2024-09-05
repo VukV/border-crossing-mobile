@@ -40,7 +40,11 @@ class _BorderCrossingAppState extends State<BorderCrossingApp> {
         scaffoldBackgroundColor: Colors.grey[300],
 
       ),
-      home: _isLoggedIn ? const MainScreen() : LoginScreen(),
+      home: _isLoggedIn ? const MainScreen() : const LoginScreen(),
+      routes: {
+        '/main': (context) => const MainScreen(),
+        '/login': (context) => const LoginScreen(),
+      },
     );
   }
 }

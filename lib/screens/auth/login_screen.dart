@@ -2,21 +2,60 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/widgets/bc_button.dart';
 import 'package:border_crossing_mobile/screens/auth/register_screen.dart';
+import '../../models/error.dart';
+import '../../services/auth_service.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool isLoading = false;
 
-  void login() {
-    print('Test login');
+  Future<void> _login() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final email = emailController.text;
+      final password = passwordController.text;
+
+      final user = await _authService.login(email, password);
+      if (user != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    } catch (e) {
+      if (e is BCError) {
+        _showSnackbar(e.message);
+      } else {
+        _showSnackbar('An unknown error occurred.');
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void navigateToRegisterScreen(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterScreen()),
+    );
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
     );
   }
 
@@ -56,9 +95,11 @@ class LoginScreen extends StatelessWidget {
                 obscureText: true,
               ),
               const SizedBox(height: 32),
-              BCButton(
-                onPressed: login,
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : BCButton(
                 text: 'Login',
+                onPressed: _login,
               ),
               const Spacer(),
               Center(
