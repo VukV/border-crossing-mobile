@@ -47,4 +47,27 @@ class BorderService {
     }
   }
 
+  Future<void> favoriteToggle(BorderCheckpoint border) async {
+    final token = await _authService.getJwtToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    final endpoint = border.favorite
+        ? Uri.parse('${ApiEndpoints.borders}/unfavourite/${border.id}')
+        : Uri.parse('${ApiEndpoints.borders}/favourite/${border.id}');
+
+    try {
+      final response = await http.patch(endpoint, headers: headers);
+
+      if (response.statusCode != 200) {
+        final errorResponse = jsonDecode(response.body);
+        throw BCError.fromJson(errorResponse);
+      }
+    } catch (e) {
+      throw BCError(message: 'Failed to toggle favorite status.');
+    }
+  }
+
 }

@@ -34,7 +34,7 @@ class _BordersScreenState extends State<BordersScreen> {
     setState(() {
       _countryFrom = country;
     });
-    _loadBorders(); // Load borders after selecting country
+    _loadBorders();
   }
 
   Future<void> _loadBorders() async {
@@ -72,14 +72,6 @@ class _BordersScreenState extends State<BordersScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  void _toggleFavorite(BorderCheckpoint checkpoint) async {
-    setState(() {
-      checkpoint.favorite = !checkpoint.favorite; // Toggle favorite status
-    });
-
-    // Here you would typically also send the updated status to your backend
   }
 
   @override
@@ -212,8 +204,7 @@ class _BordersScreenState extends State<BordersScreen> {
                 itemBuilder: (context, index) {
                   final checkpoint = _borderCheckpoints[index];
                   return BorderCheckpointWidget(
-                    border: checkpoint,
-                    onFavoriteToggle: () => _toggleFavorite(checkpoint),
+                    border: checkpoint
                   );
                 },
               ),

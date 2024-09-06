@@ -1,40 +1,45 @@
 import 'package:border_crossing_mobile/models/border/border.dart';
+import 'package:border_crossing_mobile/models/error.dart';
 import 'package:border_crossing_mobile/services/border_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 
 class BorderCheckpointWidget extends StatefulWidget {
   final BorderCheckpoint border;
-  final VoidCallback onFavoriteToggle;
 
   const BorderCheckpointWidget({
     super.key,
-    required this.border,
-    required this.onFavoriteToggle,
+    required this.border
   });
 
   @override
-  _BorderCheckpointWidgetState createState() => _BorderCheckpointWidgetState();
+  State<BorderCheckpointWidget> createState() => _BorderCheckpointWidgetState();
 }
 
 class _BorderCheckpointWidgetState extends State<BorderCheckpointWidget> {
   bool _isLoading = false; // State to manage the loading indicator
-  final borderService = BorderService();
+  final _borderService = BorderService();
 
   Future<void> _toggleFavorite() async {
     setState(() {
       _isLoading = true;
     });
 
+
     try {
-      // Call the API to update the favorite status
-      await Future.delayed(const Duration(seconds: 1));
-      // Notify parent to update state
-      widget.onFavoriteToggle();
+      await _borderService.favoriteToggle(widget.border);
+      setState(() {
+        widget.border.favorite = !widget.border.favorite;
+      });
     } catch (e) {
-      // Handle errors (e.g., show a snackbar)
-      if (mounted) {
-        SnackbarUtils.showSnackbar(context, 'Failed to update favorite status.');
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
       }
     } finally {
       setState(() {
