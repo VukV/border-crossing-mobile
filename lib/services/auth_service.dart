@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-
   static const String _loginKey = 'isLoggedIn';
   static const String _jwtTokenKey = 'jwt';
   static const String _emailKey = 'email';

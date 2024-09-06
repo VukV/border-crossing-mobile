@@ -17,6 +17,7 @@ class SettingsService {
 
   Future<void> saveSelectedCountry(Country selectedCountry) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(selectedCountry);
     await prefs.setString(_selectedCountryKey, selectedCountry.name);
   }
 
