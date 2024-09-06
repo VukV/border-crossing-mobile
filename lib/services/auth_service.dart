@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:border_crossing_mobile/constants/api_endpoints.dart';
 import 'package:border_crossing_mobile/models/error.dart';
 import 'package:border_crossing_mobile/models/user/profile.dart';
+import 'package:border_crossing_mobile/models/user/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../models/user/user.dart';
 
 class AuthService {
 

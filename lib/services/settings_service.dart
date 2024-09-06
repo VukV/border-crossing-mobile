@@ -1,5 +1,5 @@
+import 'package:border_crossing_mobile/models/country.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/country.dart';
 
 class SettingsService {
   static const String _automaticModeKey = 'automaticMode';
@@ -27,7 +27,7 @@ class SettingsService {
     if (countryString != null) {
       return Country.values.byName(countryString);
     } else {
-      prefs.setString(_selectedCountryKey, Country.SRB.name);
+      await prefs.setString(_selectedCountryKey, Country.SRB.name);
     }
     return Country.SRB;
   }

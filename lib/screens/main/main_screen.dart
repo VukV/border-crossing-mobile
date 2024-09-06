@@ -1,6 +1,6 @@
 import 'package:border_crossing_mobile/screens/main/profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'border_times_screen.dart';
+import 'border_times/borders_screen.dart';
 import 'favourites_screen.dart';
 import 'map_screen.dart';
 
@@ -16,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MapScreen(),
-    const BorderTimesScreen(),
+    const BordersScreen(),
     const FavoritesScreen(),
     const ProfileScreen(),
   ];

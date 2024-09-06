@@ -170,9 +170,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           SizedBox(
-                            width: 120.0, // Set the width of the DropdownButton here
+                            width: 120.0,
                             child: DropdownButton<Country>(
-                              isExpanded: true, // Ensures the dropdown fits within its container
+                              isExpanded: true,
                               value: _country,
                               dropdownColor: Colors.grey[300],
                               hint: const Text('Choose your country'),
@@ -181,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   value: country,
                                   child: Text(
                                     country.name.toUpperCase(),
-                                    overflow: TextOverflow.ellipsis, // Handle overflow of text if needed
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 );
                               }).toList(),
