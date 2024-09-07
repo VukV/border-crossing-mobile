@@ -6,6 +6,7 @@ import 'package:border_crossing_mobile/services/border_service.dart';
 import 'package:border_crossing_mobile/services/settings_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:border_crossing_mobile/widgets/border_widget.dart';
+import 'package:border_crossing_mobile/widgets/empy_state_widget.dart';
 import 'package:flutter/material.dart';
 
 class BordersScreen extends StatefulWidget {
@@ -47,7 +48,7 @@ class _BordersScreenState extends State<BordersScreen> {
     });
 
     try {
-      final response = await _borderService.getCheckpoints(
+      final response = await _borderService.getBorderCheckpoints(
         countryFrom: _countryFrom!,
         countryTo: _countryTo
       );
@@ -198,18 +199,19 @@ class _BordersScreenState extends State<BordersScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator()) // Show loader
+                  ? const Center(child: CircularProgressIndicator())
+                  : _borderCheckpoints.isEmpty
+                  ? const EmptyStateWidget(passedText: 'checkpoints')
                   : ListView.builder(
                 itemCount: _borderCheckpoints.length,
                 itemBuilder: (context, index) {
                   final checkpoint = _borderCheckpoints[index];
-                  return BorderCheckpointWidget(
-                    border: checkpoint
-                  );
+                  return BorderCheckpointWidget(border: checkpoint);
                 },
               ),
             ),
-          ),
+          )
+
         ],
       ),
     );
