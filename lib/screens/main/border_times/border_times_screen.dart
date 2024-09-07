@@ -6,6 +6,7 @@ import 'package:border_crossing_mobile/services/border_crossing_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:border_crossing_mobile/widgets/bc_button.dart';
 import 'package:border_crossing_mobile/widgets/border_time_widget.dart'; // Import your custom widget
+import 'package:border_crossing_mobile/widgets/empty_state_widget.dart';
 import 'package:flutter/material.dart';
 
 class BorderTimesScreen extends StatefulWidget {
@@ -136,12 +137,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : _recentCrossings.isEmpty
-                            ? Center(
-                          child: Text(
-                            'No recent crossings',
-                            style: TextStyle(fontSize: 16.0, color: Colors.deepPurple[700]),
-                          ),
-                        )
+                            ? const EmptyStateWidget(passedText: 'recent crossings')
                             : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(32, 10, 32, 10),
                           itemCount: _recentCrossings.length,
