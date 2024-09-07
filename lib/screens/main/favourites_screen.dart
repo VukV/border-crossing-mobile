@@ -93,7 +93,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> with TickerProviderSt
                 ),
               ),
             ),
-
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
