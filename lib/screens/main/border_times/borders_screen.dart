@@ -13,7 +13,7 @@ class BordersScreen extends StatefulWidget {
   const BordersScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BordersScreenState();
+  State<BordersScreen> createState() => _BordersScreenState();
 }
 
 class _BordersScreenState extends State<BordersScreen> {

@@ -21,7 +21,7 @@ class BorderCheckpointWidget extends StatefulWidget {
 
 class BorderCheckpointWidgetState extends State<BorderCheckpointWidget> {
   bool _isLoading = false;
-  final _borderService = BorderService();
+  final BorderService _borderService = BorderService();
 
   Future<void> _toggleFavorite() async {
     setState(() {

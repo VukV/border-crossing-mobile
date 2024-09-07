@@ -1,18 +1,61 @@
+import 'package:border_crossing_mobile/models/border/border.dart';
+import 'package:border_crossing_mobile/models/error.dart';
+import 'package:border_crossing_mobile/services/border_service.dart';
+import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 
-class FavoritesScreen extends StatelessWidget {
+class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
-  // TODO
-  // final BorderService _borderService = BorderService();
-  //
-  // void _toggleFavorite(BorderCheckpoint checkpoint) async {
-  //   setState(() {
-  //     checkpoint.favorite = !checkpoint.favorite; // Toggle favorite status
-  //   });
-  //
-  //   // Here you would typically also send the updated status to your backend
-  // }
+  @override
+  State<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends State<FavoritesScreen> {
+  final BorderService _borderService = BorderService();
+  List<BorderCheckpoint> _favorites = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final favorites = await _borderService.getFavoriteBorderCheckpoints();
+      if (favorites != null) {
+        setState(() {
+          _favorites = favorites;
+        });
+      }
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _unfavorite(BorderCheckpoint checkpoint) async {
+    setState(() {
+      _favorites.remove(checkpoint);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

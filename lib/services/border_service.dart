@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 class BorderService {
   final AuthService _authService = AuthService();
 
-  Future<PageableResponse<BorderCheckpoint>?> getCheckpoints({
+  Future<PageableResponse<BorderCheckpoint>?> getBorderCheckpoints({
     required Country countryFrom,
     Country? countryTo,
     int page = 0,
@@ -44,6 +44,31 @@ class BorderService {
       }
     } catch (e) {
       return Future.error(BCError(message: 'Failed to fetch checkpoints'));
+    }
+  }
+
+  Future<List<BorderCheckpoint>?> getFavoriteBorderCheckpoints() async {
+    final uri = Uri.parse('${ApiEndpoints.borders}/favorites');
+
+    try {
+      final jwt = await _authService.getJwtToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (jwt != null) 'Authorization': 'Bearer $jwt',
+      };
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final List<dynamic> jsonList = jsonResponse as List<dynamic>;
+        return jsonList.map((json) => BorderCheckpoint.fromJson(json)).toList();
+      } else {
+        final errorResponse = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(errorResponse));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Failed to fetch favorite checkpoints'));
     }
   }
 
