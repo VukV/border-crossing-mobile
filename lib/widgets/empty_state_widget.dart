@@ -14,14 +14,14 @@ class EmptyStateWidget extends StatelessWidget {
         Icon(
           Icons.search_off,
           size: 80,
-          color: Colors.grey[400],
+          color: Colors.deepPurple[300],
         ),
         const SizedBox(height: 16),
         Text(
           'There are no $passedText to show.',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey[600],
+            color: Colors.deepPurple[300],
           ),
           textAlign: TextAlign.center,
         ),

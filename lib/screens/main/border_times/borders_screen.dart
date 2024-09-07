@@ -6,7 +6,7 @@ import 'package:border_crossing_mobile/services/border_service.dart';
 import 'package:border_crossing_mobile/services/settings_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:border_crossing_mobile/widgets/border_widget.dart';
-import 'package:border_crossing_mobile/widgets/empy_state_widget.dart';
+import 'package:border_crossing_mobile/widgets/empty_state_widget.dart';
 import 'package:flutter/material.dart';
 
 class BordersScreen extends StatefulWidget {

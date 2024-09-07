@@ -96,7 +96,7 @@ class BorderCheckpointWidgetState extends State<BorderCheckpointWidget> {
                 ),
                 const SizedBox(height: 8.0),
                 Text(
-                  '${widget.border.countryFrom.name.toUpperCase()} → ${widget.border.countryTo.name.toUpperCase()}',
+                  '${widget.border.countryFrom.name.toUpperCase()} ➔ ${widget.border.countryTo.name.toUpperCase()}',
                   style: const TextStyle(
                     fontSize: 16.0,
                     color: Colors.black54,

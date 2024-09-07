@@ -48,7 +48,7 @@ class BorderService {
   }
 
   Future<List<BorderCheckpoint>?> getFavoriteBorderCheckpoints() async {
-    final uri = Uri.parse('${ApiEndpoints.borders}/favorites');
+    final uri = Uri.parse('${ApiEndpoints.borders}/favourites');
 
     try {
       final jwt = await _authService.getJwtToken();
