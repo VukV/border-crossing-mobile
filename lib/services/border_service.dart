@@ -22,7 +22,7 @@ class BorderService {
       'page': page.toString(),
       'size': size.toString(),
     };
-    final uri = Uri.parse(ApiEndpoints.borders).replace(queryParameters: queryParameters);
+    final uri = Uri.parse(ApiEndpoints.border).replace(queryParameters: queryParameters);
 
     try {
       final jwt = await _authService.getJwtToken();
@@ -48,7 +48,7 @@ class BorderService {
   }
 
   Future<List<BorderCheckpoint>?> getFavoriteBorderCheckpoints() async {
-    final uri = Uri.parse('${ApiEndpoints.borders}/favourites');
+    final uri = Uri.parse('${ApiEndpoints.border}/favourites');
 
     try {
       final jwt = await _authService.getJwtToken();
@@ -80,8 +80,8 @@ class BorderService {
     };
 
     final endpoint = border.favorite
-        ? Uri.parse('${ApiEndpoints.borders}/unfavourite/${border.id}')
-        : Uri.parse('${ApiEndpoints.borders}/favourite/${border.id}');
+        ? Uri.parse('${ApiEndpoints.border}/unfavourite/${border.id}')
+        : Uri.parse('${ApiEndpoints.border}/favourite/${border.id}');
 
     try {
       final response = await http.patch(endpoint, headers: headers);

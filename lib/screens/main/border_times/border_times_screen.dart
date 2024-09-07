@@ -1,6 +1,11 @@
 import 'package:border_crossing_mobile/models/border/border.dart';
+import 'package:border_crossing_mobile/models/border/border_analytics.dart';
+import 'package:border_crossing_mobile/models/border/border_crossing.dart';
 import 'package:border_crossing_mobile/models/error.dart';
+import 'package:border_crossing_mobile/services/border_crossing_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
+import 'package:border_crossing_mobile/widgets/bc_button.dart';
+import 'package:border_crossing_mobile/widgets/border_time_widget.dart'; // Import your custom widget
 import 'package:flutter/material.dart';
 
 class BorderTimesScreen extends StatefulWidget {
@@ -13,11 +18,15 @@ class BorderTimesScreen extends StatefulWidget {
 }
 
 class _BorderTimesScreenState extends State<BorderTimesScreen> {
+  final BorderCrossingService _borderCrossingService = BorderCrossingService();
+  List<BorderCrossing> _recentCrossings = [];
+  BorderAnalytics? _borderAnalytics = null;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _loadBorderData();
   }
 
   Future<void> _loadBorderData() async {
@@ -26,7 +35,19 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
     });
 
     try {
-      // TODO
+      final recentCrossings = await _borderCrossingService.getRecentCrossings(widget.border.id);
+      final analytics = await _borderCrossingService.getBorderAnalytics(widget.border.id);
+
+      if (analytics != null) {
+        setState(() {
+          _borderAnalytics = analytics;
+        });
+      }
+      if (recentCrossings != null) {
+        setState(() {
+          _recentCrossings = recentCrossings;
+        });
+      }
     } catch (e) {
       if (e is BCError) {
         if (mounted) {
@@ -42,6 +63,11 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _addNewWaitingTime() {
+    // For now, just print something to the console
+    print('Add new waiting time button pressed');
   }
 
   @override
@@ -82,10 +108,14 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                     color: Colors.deepPurple[700],
                   ),
                 ),
+                const SizedBox(height: 8.0),
+                BCButton(
+                    text: 'Add New Waiting Time',
+                    onPressed: _addNewWaitingTime
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 8.0),
           Expanded(
             child: DefaultTabController(
               length: 2,
@@ -103,14 +133,22 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                     child: TabBarView(
                       children: [
                         // Content for Recent Crossings tab
-                        Center(
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _recentCrossings.isEmpty
+                            ? Center(
                           child: Text(
-                            'Recent Crossings Content',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.deepPurple[700],
-                            ),
+                            'No recent crossings',
+                            style: TextStyle(fontSize: 16.0, color: Colors.deepPurple[700]),
                           ),
+                        )
+                            : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(32, 10, 32, 0),
+                          itemCount: _recentCrossings.length,
+                          itemBuilder: (context, index) {
+                            final crossing = _recentCrossings[index];
+                            return BorderTimeWidget(borderCrossing: crossing);
+                          },
                         ),
                         // Content for Statistics tab
                         Center(
