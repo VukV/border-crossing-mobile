@@ -143,7 +143,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                           ),
                         )
                             : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(32, 10, 32, 0),
+                          padding: const EdgeInsets.fromLTRB(32, 10, 32, 10),
                           itemCount: _recentCrossings.length,
                           itemBuilder: (context, index) {
                             final crossing = _recentCrossings[index];
