@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:border_crossing_mobile/constants/api_endpoints.dart';
 import 'package:border_crossing_mobile/models/border/border_analytics.dart';
 import 'package:border_crossing_mobile/models/border/border_crossing.dart';
@@ -7,6 +6,7 @@ import 'package:border_crossing_mobile/models/error.dart';
 import 'package:border_crossing_mobile/services/auth_service.dart';
 import 'package:border_crossing_mobile/utils/date_time_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,7 +51,11 @@ class BorderCrossingService {
   }
 
   Future<BorderAnalytics?> getBorderAnalytics(String borderId) async {
-    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/analytics/$borderId');
+    final timeZone = await FlutterTimezone.getLocalTimezone();
+    final queryParameters = {
+      'userTimeZone': timeZone
+    };
+    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/analytics/$borderId').replace(queryParameters: queryParameters);
 
     try {
       final jwt = await _authService.getJwtToken();

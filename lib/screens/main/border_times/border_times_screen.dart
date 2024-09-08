@@ -149,7 +149,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                             : RefreshIndicator(
                           onRefresh: _refreshData,
                           child: _recentCrossings.isEmpty
-                              ? const EmptyStateWidget(passedText: 'recent crossings')
+                              ? const Center(child: EmptyStateWidget(passedText: 'recent crossings'),)
                               : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(32, 10, 32, 10),
                             itemCount: _recentCrossings.length,
