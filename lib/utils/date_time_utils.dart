@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 class DateTimeUtils {
 
   static Duration parseIso8601Duration(String isoDuration) {
@@ -21,6 +24,16 @@ class DateTimeUtils {
     final seconds = duration.inSeconds.remainder(60);
 
     return 'PT${hours}H${minutes}M${seconds}S';
+  }
+
+  static DateTime convertToDateTime(TimeOfDay timeOfDay) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
+  }
+
+  static String toIso8601StringUTC(DateTime dateTime) {
+    final utcDateTime = dateTime.toUtc(); // Convert to UTC
+    return DateFormat("yyyy-MM-ddTHH:mm:ss'Z'").format(utcDateTime);
   }
 
 }

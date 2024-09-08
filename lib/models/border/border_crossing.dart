@@ -21,8 +21,8 @@ class BorderCrossing {
   factory BorderCrossing.fromJson(Map<String, dynamic> json) {
     return BorderCrossing(
       id: json['id'] as String,
-      arrivalTimestamp: DateTime.parse(json['arrivalTimestamp']),
-      crossingTimestamp: DateTime.parse(json['crossingTimestamp']),
+      arrivalTimestamp: DateTime.parse(json['arrivalTimestamp']).toLocal(),
+      crossingTimestamp: DateTime.parse(json['crossingTimestamp']).toLocal(),
       duration: DateTimeUtils.parseIso8601Duration(json['duration'] as String),
       border: BorderCheckpoint.fromJson(json['border']),
       createdBy: json['createdBy'] as String,

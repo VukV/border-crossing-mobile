@@ -5,8 +5,9 @@ import 'package:border_crossing_mobile/models/error.dart';
 import 'package:border_crossing_mobile/services/border_crossing_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:border_crossing_mobile/widgets/bc_button.dart';
-import 'package:border_crossing_mobile/widgets/border_time_widget.dart'; // Import your custom widget
+import 'package:border_crossing_mobile/widgets/border_time_widget.dart';
 import 'package:border_crossing_mobile/widgets/empty_state_widget.dart';
+import 'package:border_crossing_mobile/widgets/manual_crossing_popup.dart';
 import 'package:flutter/material.dart';
 
 class BorderTimesScreen extends StatefulWidget {
@@ -65,10 +66,21 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
       });
     }
   }
-
+  
   void _addNewWaitingTime() {
-    // For now, just print something to the console
-    print('Add new waiting time button pressed');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CrossingPopup(
+          borderId: widget.border.id,
+          onCallback: _refreshData,
+        );
+      },
+    );
+  }
+
+  Future<void> _refreshData() async {
+    await _loadBorderData();
   }
 
   @override
@@ -82,9 +94,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
         ),
         title: Text(
           widget.border.name,
-          style: const TextStyle(
-              color: Colors.white
-          ),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Column(
@@ -111,8 +121,8 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 BCButton(
-                    text: 'Add New Waiting Time',
-                    onPressed: _addNewWaitingTime
+                  text: 'Add New Waiting Time',
+                  onPressed: _addNewWaitingTime,
                 ),
               ],
             ),
@@ -133,18 +143,20 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        // Content for Recent Crossings tab
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            : _recentCrossings.isEmpty
-                            ? const EmptyStateWidget(passedText: 'recent crossings')
-                            : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(32, 10, 32, 10),
-                          itemCount: _recentCrossings.length,
-                          itemBuilder: (context, index) {
-                            final crossing = _recentCrossings[index];
-                            return BorderTimeWidget(borderCrossing: crossing);
-                          },
+                            : RefreshIndicator(
+                          onRefresh: _refreshData,
+                          child: _recentCrossings.isEmpty
+                              ? const EmptyStateWidget(passedText: 'recent crossings')
+                              : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(32, 10, 32, 10),
+                            itemCount: _recentCrossings.length,
+                            itemBuilder: (context, index) {
+                              final crossing = _recentCrossings[index];
+                              return BorderTimeWidget(borderCrossing: crossing);
+                            },
+                          ),
                         ),
                         // Content for Statistics tab
                         Center(
