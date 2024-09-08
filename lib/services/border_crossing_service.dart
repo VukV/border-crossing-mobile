@@ -91,8 +91,6 @@ class BorderCrossingService {
     final String arrivalTimestamp = DateTimeUtils.toIso8601StringUTC(arrivalDateTime);
     final String crossingTimestamp = DateTimeUtils.toIso8601StringUTC(crossingDateTime);
 
-    print(arrivalTimestamp);
-
     final body = jsonEncode({
       'arrivalTimestamp': arrivalTimestamp,
       'crossingTimestamp': crossingTimestamp

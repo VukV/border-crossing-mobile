@@ -1,3 +1,4 @@
+import 'package:border_crossing_mobile/widgets/border_analytics_chart.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/models/border/border.dart';
@@ -259,6 +260,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                                 decoration: BoxDecoration(
                                   border: Border(
                                     top: BorderSide(color: Colors.grey[400]!),
+                                    bottom: BorderSide(color: Colors.grey[400]!),
                                   ),
                                 ),
                                 child: Row(
@@ -279,18 +281,24 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                                   ],
                                 )
                               ),
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Average Waiting Times by Hour',
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple[700],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                               Expanded(
                                 child: Center(
-                                  child: Text(
-                                    'CHART',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      color: Colors.deepPurple[700],
-                                    ),
+                                  child: BorderAnalyticsChart(
+                                    averageByHour: _borderAnalytics!.averageByHour,
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 32),
                             ],
                           ),
                         ),
