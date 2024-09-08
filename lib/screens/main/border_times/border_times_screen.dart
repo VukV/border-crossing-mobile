@@ -1,3 +1,5 @@
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:border_crossing_mobile/models/border/border.dart';
 import 'package:border_crossing_mobile/models/border/border_analytics.dart';
 import 'package:border_crossing_mobile/models/border/border_crossing.dart';
@@ -8,7 +10,6 @@ import 'package:border_crossing_mobile/widgets/bc_button.dart';
 import 'package:border_crossing_mobile/widgets/border_time_widget.dart';
 import 'package:border_crossing_mobile/widgets/empty_state_widget.dart';
 import 'package:border_crossing_mobile/widgets/manual_crossing_popup.dart';
-import 'package:flutter/material.dart';
 
 class BorderTimesScreen extends StatefulWidget {
   final BorderCheckpoint border;
@@ -66,7 +67,7 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
       });
     }
   }
-  
+
   void _addNewWaitingTime() {
     showDialog(
       context: context,
@@ -158,14 +159,139 @@ class _BorderTimesScreenState extends State<BorderTimesScreen> {
                             },
                           ),
                         ),
-                        // Content for Statistics tab
-                        Center(
-                          child: Text(
-                            'Statistics Content',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.deepPurple[700],
-                            ),
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _borderAnalytics == null
+                            ? const Center(child: EmptyStateWidget(passedText: 'statistics'))
+                            : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 16.0),
+                              Text(
+                                'Averages',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple[800],
+                                ),
+                              ),
+                              const SizedBox(height: 16.0),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Today',
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.deepPurple[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        Text(
+                                          '${_borderAnalytics!.averageToday} minutes',
+                                          style: const TextStyle(fontSize: 14.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const VerticalDivider(
+                                    width: 16.0,
+                                    thickness: 1.0,
+                                    color: Colors.grey,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'This Week',
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.deepPurple[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        Text(
+                                          '${_borderAnalytics!.averageWeek} minutes',
+                                          style: const TextStyle(fontSize: 14.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const VerticalDivider(
+                                    width: 16.0,
+                                    thickness: 1.0,
+                                    color: Colors.grey,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'This Month',
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.deepPurple[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        Text(
+                                          '${_borderAnalytics!.averageMonth} minutes',
+                                          style: const TextStyle(fontSize: 14.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16.0),
+                              Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: Colors.grey[400]!),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Average for Arrivals in Current Hour:   ',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple[700],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_borderAnalytics!.averageCurrentHour} minutes',
+                                      style: const TextStyle(fontSize: 14.0),
+                                    ),
+                                  ],
+                                )
+                              ),
+                              const SizedBox(height: 16.0),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    'CHART',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Colors.deepPurple[700],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
