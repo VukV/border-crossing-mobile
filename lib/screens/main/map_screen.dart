@@ -62,7 +62,7 @@ class _MapScreenState extends State<MapScreen> {
         final currentLatLng = LatLng(position.latitude, position.longitude);
         setState(() {
           _currentPosition = position;
-          _isLoading = false; // Stop loading when location is received
+          _isLoading = false;
         });
 
         if (!_isUserInteracting) {
