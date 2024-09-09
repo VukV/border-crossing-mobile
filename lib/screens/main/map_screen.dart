@@ -52,8 +52,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    setState(() => _isLoading = true);
-
     try {
       _positionStreamSubscription = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
@@ -110,36 +108,35 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Listener(
-            onPointerDown: (e) {
-              setState(() {
-                _isUserInteracting = true;
-              });
-            },
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _currentPosition != null
-                    ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-                    : const LatLng(37.7749, -122.4194), // Default to San Francisco
-                zoom: 12,
-              ),
-              onMapCreated: (controller) {
-                _mapController = controller;
-                if (_currentPosition != null) {
-                  _mapController!.animateCamera(CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                      zoom: 15,
-                    ),
-                  ));
-                }
+          if (!_isLoading && _currentPosition != null)
+            Listener(
+              onPointerDown: (e) {
+                setState(() {
+                  _isUserInteracting = true;
+                });
               },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              trafficEnabled: true,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                  zoom: 15,
+                ),
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  if (_currentPosition != null) {
+                    _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                        zoom: 15,
+                      ),
+                    ));
+                  }
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                trafficEnabled: true,
+              ),
             ),
-          ),
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
           Positioned(
