@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -18,13 +18,14 @@ class _MapScreenState extends State<MapScreen> {
   bool _isLoading = true;
   StreamSubscription<Position>? _positionStreamSubscription;
   LatLng? _lastPosition;
-  final _cameraUpdateThrottle = Duration(milliseconds: 1000); // Throttle duration
   Timer? _cameraUpdateTimer;
+  final Duration _cameraUpdateThrottle = const Duration(milliseconds: 1000);
+  bool _isUserInteracting = false;
 
   @override
   void initState() {
     super.initState();
-    requestLocationPermission();
+    _requestLocationPermission();
   }
 
   @override
@@ -34,53 +35,44 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
-  Future<void> requestLocationPermission() async {
+  Future<void> _requestLocationPermission() async {
     final status = await Permission.location.request();
     if (status.isGranted) {
-      // Permission is granted, get current location
-      getCurrentLocation();
-    } else if (status.isDenied) {
-      // Permission is denied
-      print('Location permission denied');
+      _getCurrentLocation();
+    } else {
       setState(() {
-        _isLoading = false; // Set loading to false when permission is denied
-      });
-    } else if (status.isPermanentlyDenied) {
-      // Permission is permanently denied, open settings
-      openAppSettings();
-      setState(() {
-        _isLoading = false; // Set loading to false when permission is permanently denied
+        _isLoading = false;
+        if (status.isPermanentlyDenied) {
+          openAppSettings();
+        } else {
+          SnackbarUtils.showSnackbar(context, 'Location permission is required to show your location.');
+        }
       });
     }
   }
 
-  Future<void> getCurrentLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _getCurrentLocation() async {
+    setState(() => _isLoading = true);
 
     try {
-      LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high, // High accuracy for GPS
-      );
-
       _positionStreamSubscription = Geolocator.getPositionStream(
-        locationSettings: locationSettings,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+          distanceFilter: 10,
+        ),
       ).listen((Position position) {
+        final currentLatLng = LatLng(position.latitude, position.longitude);
         setState(() {
           _currentPosition = position;
           _isLoading = false;
         });
 
-        if (_mapController != null) {
-          final currentLatLng = LatLng(position.latitude, position.longitude);
-          if (_lastPosition == null || _lastPosition != currentLatLng) {
+        if (!_isUserInteracting) {
+          if (_lastPosition != currentLatLng) {
             _lastPosition = currentLatLng;
-
-            // Throttle the camera updates
             _cameraUpdateTimer?.cancel();
             _cameraUpdateTimer = Timer(_cameraUpdateThrottle, () {
-              _mapController!.moveCamera(CameraUpdate.newCameraPosition(
+              _mapController?.animateCamera(CameraUpdate.newCameraPosition(
                 CameraPosition(
                   target: currentLatLng,
                   zoom: 15,
@@ -91,9 +83,24 @@ class _MapScreenState extends State<MapScreen> {
         }
       });
     } catch (e) {
-      print('Error getting location: $e');
       setState(() {
-        _isLoading = false; // Set loading to false when there is an error
+        _isLoading = false;
+      });
+      SnackbarUtils.showSnackbar(context, 'Error fetching location');
+    }
+  }
+
+  void _recenterMap() {
+    if (_currentPosition != null && _mapController != null) {
+      final currentLatLng = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+      _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: currentLatLng,
+          zoom: 15,
+        ),
+      ));
+      setState(() {
+        _isUserInteracting = false;
       });
     }
   }
@@ -103,31 +110,48 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _currentPosition != null
-                  ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-                  : LatLng(37.7749, -122.4194), // Default to San Francisco
-              zoom: 12,
-            ),
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              if (_currentPosition != null) {
-                _mapController!.moveCamera(CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                    zoom: 15,
-                  ),
-                ));
-              }
+          Listener(
+            onPointerDown: (e) {
+              setState(() {
+                _isUserInteracting = true;
+              });
             },
-            myLocationEnabled: true, // Shows the blue dot for the user's location
-            myLocationButtonEnabled: true, // Shows the My Location button
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _currentPosition != null
+                    ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+                    : const LatLng(37.7749, -122.4194), // Default to San Francisco
+                zoom: 12,
+              ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                if (_currentPosition != null) {
+                  _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                      target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                      zoom: 15,
+                    ),
+                  ));
+                }
+              },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              trafficEnabled: true,
+            ),
           ),
           if (_isLoading)
-            Center(
-              child: CircularProgressIndicator(),
+            const Center(child: CircularProgressIndicator()),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _recenterMap,
+              backgroundColor: Colors.deepPurple[100],
+              foregroundColor: Colors.deepPurple[700],
+              child: const Icon(Icons.my_location),
             ),
+          ),
         ],
       ),
     );
