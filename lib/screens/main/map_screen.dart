@@ -62,7 +62,7 @@ class _MapScreenState extends State<MapScreen> {
         final currentLatLng = LatLng(position.latitude, position.longitude);
         setState(() {
           _currentPosition = position;
-          _isLoading = false;
+          _isLoading = false; // Stop loading when location is received
         });
 
         if (!_isUserInteracting) {
@@ -117,8 +117,10 @@ class _MapScreenState extends State<MapScreen> {
               },
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                  zoom: 15,
+                  target: _currentPosition != null
+                      ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+                      : const LatLng(44.80241600, 20.46560100), // Default to Belgrade
+                  zoom: 12,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
