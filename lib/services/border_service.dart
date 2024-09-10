@@ -47,6 +47,41 @@ class BorderService {
     }
   }
 
+  Future<List<BorderCheckpoint>?> getBorderCheckpointsByDistance({
+    required double latitude,
+    required double longitude,
+    int kilometres = 1000
+  }) async {
+    final queryParameters = {
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+      'distance': kilometres.toString(),
+    };
+
+    final uri = Uri.parse('${ApiEndpoints.border}/distance').replace(queryParameters: queryParameters);
+
+    try {
+      final jwt = await _authService.getJwtToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (jwt != null) 'Authorization': 'Bearer $jwt',
+      };
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final List<dynamic> jsonList = jsonResponse as List<dynamic>;
+        return jsonList.map((json) => BorderCheckpoint.fromJson(json)).toList();
+      } else {
+        final errorResponse = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(errorResponse));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Failed to fetch checkpoints'));
+    }
+  }
+
   Future<List<BorderCheckpoint>?> getFavoriteBorderCheckpoints() async {
     final uri = Uri.parse('${ApiEndpoints.border}/favourites');
 

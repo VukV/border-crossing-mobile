@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'package:border_crossing_mobile/models/border/border.dart';
+import 'package:border_crossing_mobile/models/error.dart';
+import 'package:border_crossing_mobile/services/border_crossing_service.dart';
+import 'package:border_crossing_mobile/services/border_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,13 +18,20 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
-  Position? _currentPosition;
-  bool _isLoading = true;
   StreamSubscription<Position>? _positionStreamSubscription;
+  final BorderService _borderService = BorderService();
+  final BorderCrossingService _borderCrossingService = BorderCrossingService();
+
+  Position? _currentPosition;
   LatLng? _lastPosition;
+
   Timer? _cameraUpdateTimer;
   final Duration _cameraUpdateThrottle = const Duration(milliseconds: 1000);
+
+  List<BorderCheckpoint> _borders = [];
   bool _isUserInteracting = false;
+  bool _isLoading = true;
+  bool _bordersLoaded = false;
 
   @override
   void initState() {
@@ -51,6 +62,35 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Future<void> _loadBorders() async {
+    if (_currentPosition == null || _bordersLoaded) {
+      return; // don't load borders every time
+    }
+
+    try {
+      final borders = await _borderService.getBorderCheckpointsByDistance(
+        latitude: _currentPosition!.latitude,
+        longitude: _currentPosition!.longitude,
+      );
+
+      setState(() {
+        _borders = borders ?? [];
+        _bordersLoaded = true;
+      });
+
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'Failed to load border checkpoints.');
+        }
+      }
+    }
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
       _positionStreamSubscription = Geolocator.getPositionStream(
@@ -64,6 +104,8 @@ class _MapScreenState extends State<MapScreen> {
           _currentPosition = position;
           _isLoading = false;
         });
+
+        _loadBorders();
 
         if (!_isUserInteracting) {
           if (_lastPosition != currentLatLng) {
