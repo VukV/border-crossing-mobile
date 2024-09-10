@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:border_crossing_mobile/models/border/border.dart';
 import 'package:border_crossing_mobile/models/error.dart';
+import 'package:border_crossing_mobile/screens/main/border_times/border_times_screen.dart';
 import 'package:border_crossing_mobile/services/border_crossing_service.dart';
 import 'package:border_crossing_mobile/services/border_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
@@ -32,6 +33,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _isUserInteracting = false;
   bool _isLoading = true;
   bool _bordersLoaded = false;
+
+  Set<Marker> _markers = {};
 
   @override
   void initState() {
@@ -76,6 +79,21 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _borders = borders ?? [];
         _bordersLoaded = true;
+
+        _markers = _borders.map((border) {
+          return Marker(
+            markerId: MarkerId(border.id),
+            position: LatLng(border.location.latitude, border.location.longitude),
+            infoWindow: InfoWindow(
+                title: '${border.name} (${border.countryFrom.name}➔${border.countryTo.name})',
+                snippet: 'Click to see waiting times...',
+                onTap: () {
+                  _openBorderTimesScreen(border);
+                },
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+          );
+        }).toSet();
       });
 
     } catch (e) {
@@ -145,6 +163,15 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _openBorderTimesScreen(BorderCheckpoint border) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BorderTimesScreen(border: border),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,6 +206,8 @@ class _MapScreenState extends State<MapScreen> {
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 trafficEnabled: true,
+                mapToolbarEnabled: false,
+                markers: _markers,
               ),
             ),
           if (_isLoading)
