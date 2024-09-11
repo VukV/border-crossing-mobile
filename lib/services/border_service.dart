@@ -10,6 +10,29 @@ import 'package:http/http.dart' as http;
 class BorderService {
   final AuthService _authService = AuthService();
 
+  Future<BorderCheckpoint?> getBorderCheckpoint(String borderId) async {
+    final uri = Uri.parse('${ApiEndpoints.border}/$borderId');
+
+    try {
+      final jwt = await _authService.getJwtToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (jwt != null) 'Authorization': 'Bearer $jwt',
+      };
+      final response = await http.patch(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return BorderCheckpoint.fromJson(json);
+      } else {
+        final error = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(error));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Unexpected error occurred.'));
+    }
+  }
+
   Future<PageableResponse<BorderCheckpoint>?> getBorderCheckpoints({
     required Country countryFrom,
     Country? countryTo,

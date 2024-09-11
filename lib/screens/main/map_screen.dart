@@ -37,13 +37,15 @@ class _MapScreenState extends State<MapScreen> {
   Set<Marker> _markers = {};
 
   bool _insideGeofence = false;
+  String? _activeBorderId;
   String? _activeCrossingId;
-  DateTime? lastCrossingTime;
+  DateTime? _lastCrossingTime;
 
   @override
   void initState() {
     super.initState();
     _requestLocationPermission();
+    _loadCrossingData();
   }
 
   @override
@@ -66,6 +68,42 @@ class _MapScreenState extends State<MapScreen> {
           SnackbarUtils.showSnackbar(context, 'Location permission is required to show your location.');
         }
       });
+    }
+  }
+
+  Future<void> _loadCrossingData() async {
+    _insideGeofence = await _borderCrossingService.getInsideGeofence();
+    _activeBorderId = await _borderCrossingService.getActiveBorderId();
+    _activeCrossingId = await _borderCrossingService.getActiveCrossingId();
+    _lastCrossingTime = await _borderCrossingService.getLastCrossingTime();
+  }
+
+  Future<void> _validateCrossingData(Position position) async {
+    try {
+      final border = await _borderService.getBorderCheckpoint(_activeBorderId!);
+
+      if (border != null) {
+        final double distance = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          border.location.latitude,
+          border.location.longitude,
+        );
+
+        if (distance >= 10000) {
+          _borderCrossingService.clearCrossingData();
+        }
+      }
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
+      }
     }
   }
 
@@ -126,7 +164,9 @@ class _MapScreenState extends State<MapScreen> {
         if (_currentPosition != null && !_bordersLoaded) {
           _loadBorders(); // don't load borders every time
         }
-
+        if (_activeBorderId != null) {
+          _validateCrossingData(position);
+        }
         _checkGeofence(position);
 
         if (!_isUserInteracting) {
@@ -187,22 +227,24 @@ class _MapScreenState extends State<MapScreen> {
   void _enteredBorder(String borderId) {
     // TODO
     // if time
+    // set active border id
     _insideGeofence = true;
     // set shared prefs boolean + time
-  }
-  
-  void _crossedBorder() {
-    // TODO
-    _insideGeofence = false;
-    // api call (if error -> set to true ^)
-    // set shared prefs + time
-    _activeCrossingId = null;
   }
 
   void _startCrossing(String borderId) {
     // TODO
     // api call (if error -> set to false ^)
     // set _activeCrossingId
+  }
+  
+  void _crossedBorder() {
+    // TODO
+    // if id == null return
+    _insideGeofence = false;
+    // api call (if error -> set to true ^)
+    // set shared prefs + time
+    _activeCrossingId = null;
   }
 
   void _recenterMap() {

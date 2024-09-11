@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class BorderCrossingService {
   static const String _lastCrossingTimeKey = 'lastCrossingTime';
   static const String _insideGeofenceKey = 'lastCrossingTime';
+  static const String _activeBorderIdKey = 'activeBorderId';
   static const String _activeCrossingIdKey = 'activeCrossingId';
 
   final AuthService _authService = AuthService();
@@ -55,14 +56,25 @@ class BorderCrossingService {
     return prefs.getString(_activeCrossingIdKey);
   }
 
+  Future<void> setActiveBorderId(String crossingId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_activeBorderIdKey, crossingId);
+  }
+
+  Future<String?> getActiveBorderId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_activeBorderIdKey);
+  }
+
   Future<void> clearCrossingData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(_insideGeofenceKey);
     await prefs.remove(_activeCrossingIdKey);
+    await prefs.remove(_activeBorderIdKey);
   }
 
   Future<List<BorderCrossing>?> getRecentCrossings(String borderId) async {
-    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/$borderId');
+    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/recent/$borderId');
 
     try {
       final jwt = await _authService.getJwtToken();
@@ -139,6 +151,51 @@ class BorderCrossingService {
         if (jwt != null) 'Authorization': 'Bearer $jwt',
       };
       final response = await http.post(uri, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final error = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(error));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Unexpected error occurred.'));
+    }
+  }
+
+  Future<BorderCrossing?> arrivedAtBorder(String borderId) async {
+    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/$borderId');
+
+    try {
+      final jwt = await _authService.getJwtToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (jwt != null) 'Authorization': 'Bearer $jwt',
+      };
+      final response = await http.post(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return BorderCrossing.fromJson(json);
+      } else {
+        final error = jsonDecode(response.body);
+        return Future.error(BCError.fromJson(error));
+      }
+    } catch (e) {
+      return Future.error(BCError(message: 'Unexpected error occurred.'));
+    }
+  }
+
+  Future<void> crossedBorder(String crossingId) async {
+    final uri = Uri.parse('${ApiEndpoints.borderCrossing}/$crossingId');
+
+    try {
+      final jwt = await _authService.getJwtToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (jwt != null) 'Authorization': 'Bearer $jwt',
+      };
+      final response = await http.patch(uri, headers: headers);
 
       if (response.statusCode == 200) {
         return;
