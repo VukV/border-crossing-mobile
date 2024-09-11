@@ -11,20 +11,56 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BorderCrossingService {
-  static const String _lastCrossingKey = 'lastCrossing';
+  static const String _lastCrossingTimeKey = 'lastCrossingTime';
+  static const String _insideGeofenceKey = 'lastCrossingTime';
+  static const String _activeCrossingIdKey = 'activeCrossingId';
+
   final AuthService _authService = AuthService();
 
-  Future<DateTime?> getLastCrossingTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? dateTime = prefs.getString(_lastCrossingKey);
+  Future<void> setLastCrossingTime() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    DateTime now = DateTime.now();
+    String formattedTime = now.toIso8601String();
 
-    if (dateTime != null) {
-      return DateTime.parse(dateTime);
-    } else {
-      return null;
-    }
+    await prefs.setString(_lastCrossingTimeKey, formattedTime);
   }
-  
+
+  Future<DateTime?> getLastCrossingTime() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? lastCrossingTimeStr = prefs.getString(_lastCrossingTimeKey);
+
+    if (lastCrossingTimeStr != null) {
+      return DateTime.parse(lastCrossingTimeStr);
+    }
+    return null;
+  }
+
+  Future<void> setInsideGeofence(bool isInside) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_insideGeofenceKey, isInside);
+  }
+
+  Future<bool> getInsideGeofence() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_insideGeofenceKey) ?? false;
+  }
+
+  Future<void> setActiveCrossingId(String crossingId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_activeCrossingIdKey, crossingId);
+  }
+
+  Future<String?> getActiveCrossingId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_activeCrossingIdKey);
+  }
+
+  Future<void> clearCrossingData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_insideGeofenceKey);
+    await prefs.remove(_activeCrossingIdKey);
+  }
+
   Future<List<BorderCrossing>?> getRecentCrossings(String borderId) async {
     final uri = Uri.parse('${ApiEndpoints.borderCrossing}/$borderId');
 

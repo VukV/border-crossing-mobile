@@ -28,13 +28,17 @@ class _MapScreenState extends State<MapScreen> {
 
   Timer? _cameraUpdateTimer;
   final Duration _cameraUpdateThrottle = const Duration(milliseconds: 1000);
+  final double _mapZoom = 14;
 
   List<BorderCheckpoint> _borders = [];
   bool _isUserInteracting = false;
   bool _isLoading = true;
   bool _bordersLoaded = false;
-
   Set<Marker> _markers = {};
+
+  bool _insideGeofence = false;
+  String? _activeCrossingId;
+  DateTime? lastCrossingTime;
 
   @override
   void initState() {
@@ -66,10 +70,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _loadBorders() async {
-    if (_currentPosition == null || _bordersLoaded) {
-      return; // don't load borders every time
-    }
-
     try {
       final borders = await _borderService.getBorderCheckpointsByDistance(
         latitude: _currentPosition!.latitude,
@@ -85,11 +85,11 @@ class _MapScreenState extends State<MapScreen> {
             markerId: MarkerId(border.id),
             position: LatLng(border.location.latitude, border.location.longitude),
             infoWindow: InfoWindow(
-                title: '${border.name} (${border.countryFrom.name}➔${border.countryTo.name})',
-                snippet: 'Click to see waiting times...',
-                onTap: () {
-                  _openBorderTimesScreen(border);
-                },
+              title: '${border.name} (${border.countryFrom.name} ➔ ${border.countryTo.name})',
+              snippet: 'Click to see waiting times...',
+              onTap: () {
+                _openBorderTimesScreen(border);
+              },
             ),
             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
           );
@@ -123,7 +123,11 @@ class _MapScreenState extends State<MapScreen> {
           _isLoading = false;
         });
 
-        _loadBorders();
+        if (_currentPosition != null && !_bordersLoaded) {
+          _loadBorders(); // don't load borders every time
+        }
+
+        _checkGeofence(position);
 
         if (!_isUserInteracting) {
           if (_lastPosition != currentLatLng) {
@@ -133,7 +137,7 @@ class _MapScreenState extends State<MapScreen> {
               _mapController?.animateCamera(CameraUpdate.newCameraPosition(
                 CameraPosition(
                   target: currentLatLng,
-                  zoom: 15,
+                  zoom: _mapZoom,
                 ),
               ));
             });
@@ -148,13 +152,66 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _checkGeofence(Position userPosition) {
+    for (BorderCheckpoint border in _borders) {
+      final double entryDistance = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        border.location.entryLatitude,
+        border.location.entryLongitude,
+      );
+
+      final double exitDistance = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        border.location.exitLatitude,
+        border.location.exitLongitude,
+      );
+
+      if (entryDistance < 150 && !_insideGeofence) {
+        _enteredBorder(border.id);
+      }
+
+      if (_insideGeofence && userPosition.speed < 1.5) {
+        _startCrossing(border.id);
+        // TODO snackbar
+      }
+
+      if (exitDistance < 100 && _insideGeofence) {
+        _crossedBorder();
+        // TODO snackbar
+      }
+    }
+  }
+  
+  void _enteredBorder(String borderId) {
+    // TODO
+    // if time
+    _insideGeofence = true;
+    // set shared prefs boolean + time
+  }
+  
+  void _crossedBorder() {
+    // TODO
+    _insideGeofence = false;
+    // api call (if error -> set to true ^)
+    // set shared prefs + time
+    _activeCrossingId = null;
+  }
+
+  void _startCrossing(String borderId) {
+    // TODO
+    // api call (if error -> set to false ^)
+    // set _activeCrossingId
+  }
+
   void _recenterMap() {
     if (_currentPosition != null && _mapController != null) {
       final currentLatLng = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
       _mapController!.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
           target: currentLatLng,
-          zoom: 15,
+          zoom: _mapZoom,
         ),
       ));
       setState(() {
