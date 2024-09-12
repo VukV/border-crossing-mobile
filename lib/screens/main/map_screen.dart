@@ -48,12 +48,10 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _borderCrossingService.clearCrossingData(); // TODO delete
     _loadAutomaticMode();
     _requestLocationPermission();
     _loadCrossingData();
     _getActiveBorder();
-    _lastCrossingTime = null; // TODO delete
   }
 
   @override
@@ -250,12 +248,11 @@ class _MapScreenState extends State<MapScreen> {
         _enteredBorder(border.id);
       }
 
-      if (_insideGeofence && userPosition.speed < 1.5 && _activeBorderId == border.id) {
+      if (_insideGeofence && userPosition.speed < 30 && _activeBorderId == border.id) {
         _startCrossing(border.id);
       }
 
       if (exitDistance < 100 && _insideGeofence && _activeCrossingId != null) {
-        print('PROSA');
         _crossedBorder();
       }
     }
@@ -276,6 +273,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _startCrossing(String borderId) async {
+    if (_activeCrossingId != null) {
+      return;
+    }
     try {
       final crossingId = await _borderCrossingService.arrivedAtBorder(borderId);
 
@@ -311,7 +311,6 @@ class _MapScreenState extends State<MapScreen> {
     try {
       if (_activeCrossingId != null) {
         await _borderCrossingService.crossedBorder(_activeCrossingId!);
-        print('BRISI SVE');
         _insideGeofence = false;
         _activeCrossingId = null;
         _lastCrossingTime = DateTime.now();
