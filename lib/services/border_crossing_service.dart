@@ -56,9 +56,9 @@ class BorderCrossingService {
     return prefs.getString(_activeCrossingIdKey);
   }
 
-  Future<void> setActiveBorderId(String crossingId) async {
+  Future<void> setActiveBorderId(String borderId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_activeBorderIdKey, crossingId);
+    await prefs.setString(_activeBorderIdKey, borderId);
   }
 
   Future<String?> getActiveBorderId() async {
@@ -94,7 +94,8 @@ class BorderCrossingService {
         return Future.error(BCError.fromJson(errorResponse));
       }
     } catch (e) {
-      return Future.error(BCError(message: 'Failed to fetch recent crossings'));
+      print(e);
+      return Future.error(BCError(message: 'Failed to fetch recent crossings.'));
     }
   }
 
@@ -122,7 +123,7 @@ class BorderCrossingService {
         return Future.error(BCError.fromJson(errorResponse));
       }
     } catch (e) {
-      return Future.error(BCError(message: 'Failed to fetch border analytics'));
+      return Future.error(BCError(message: 'Failed to fetch border analytics.'));
     }
   }
 
@@ -159,11 +160,11 @@ class BorderCrossingService {
         return Future.error(BCError.fromJson(error));
       }
     } catch (e) {
-      return Future.error(BCError(message: 'Unexpected error occurred.'));
+      return Future.error(BCError(message: 'Unexpected error occurred while adding new time.'));
     }
   }
 
-  Future<BorderCrossing?> arrivedAtBorder(String borderId) async {
+  Future<String?> arrivedAtBorder(String borderId) async {
     final uri = Uri.parse('${ApiEndpoints.borderCrossing}/$borderId');
 
     try {
@@ -176,13 +177,13 @@ class BorderCrossingService {
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        return BorderCrossing.fromJson(json);
+        return json['id'];
       } else {
         final error = jsonDecode(response.body);
         return Future.error(BCError.fromJson(error));
       }
     } catch (e) {
-      return Future.error(BCError(message: 'Unexpected error occurred.'));
+      return Future.error(BCError(message: 'Unexpected error occurred with arrival event.'));
     }
   }
 
@@ -204,7 +205,7 @@ class BorderCrossingService {
         return Future.error(BCError.fromJson(error));
       }
     } catch (e) {
-      return Future.error(BCError(message: 'Unexpected error occurred.'));
+      return Future.error(BCError(message: 'Unexpected error occurred with crossing event.'));
     }
   }
 

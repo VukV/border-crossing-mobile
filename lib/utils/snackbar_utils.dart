@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 class SnackbarUtils {
-  static void showSnackbar(BuildContext context, String message, [Color? customColor]) {
+  static void showSnackbar(BuildContext context, String message, {int seconds = 2, Color? customColor}) {
+    Duration duration = Duration(seconds: seconds);
     if (customColor != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          duration: const Duration(seconds: 2),
+          duration: duration,
           backgroundColor: customColor,
         ),
       );
@@ -14,7 +15,7 @@ class SnackbarUtils {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          duration: const Duration(seconds: 2),
+          duration: duration,
         ),
       );
     }

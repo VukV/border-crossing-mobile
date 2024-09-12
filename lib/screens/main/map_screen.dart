@@ -104,6 +104,7 @@ class _MapScreenState extends State<MapScreen> {
 
         if (distance >= 10000) {
           _borderCrossingService.clearCrossingData();
+          _activeBorder = null;
         }
       }
     } catch (e) {
@@ -184,7 +185,7 @@ class _MapScreenState extends State<MapScreen> {
       _positionStreamSubscription = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
-          distanceFilter: 10,
+          distanceFilter: 0,
         ),
       ).listen((Position position) {
         final currentLatLng = LatLng(position.latitude, position.longitude);
@@ -247,39 +248,94 @@ class _MapScreenState extends State<MapScreen> {
         _enteredBorder(border.id);
       }
 
-      if (_insideGeofence && userPosition.speed < 1.5) {
+      if (_insideGeofence && userPosition.speed < 1.5 && _activeBorderId == border.id) {
         _startCrossing(border.id);
-        // TODO snackbar
       }
 
-      if (exitDistance < 100 && _insideGeofence) {
+      if (exitDistance < 100 && _insideGeofence && _activeCrossingId != null) {
+        print('PROSA');
         _crossedBorder();
-        // TODO snackbar
       }
     }
   }
   
   void _enteredBorder(String borderId) {
-    // TODO
-    // if time
-    // set active border id
+    if (_lastCrossingTime != null && _lastCrossingTime!.difference(DateTime.now()).inHours < 1) {
+      return;
+    }
+
     _insideGeofence = true;
-    // set shared prefs boolean + time
+    _activeBorderId = borderId;
+    _lastCrossingTime = DateTime.now();
+
+    _borderCrossingService.setActiveBorderId(borderId);
+    _borderCrossingService.setInsideGeofence(true);
+    _borderCrossingService.setLastCrossingTime();
   }
 
-  void _startCrossing(String borderId) {
-    // TODO
-    // api call (if error -> set to false ^)
-    // set _activeCrossingId
+  Future<void> _startCrossing(String borderId) async {
+    try {
+      final crossingId = await _borderCrossingService.arrivedAtBorder(borderId);
+
+      if (crossingId != null) {
+        _activeCrossingId = crossingId;
+        _lastCrossingTime = DateTime.now();
+
+        _borderCrossingService.setActiveCrossingId(crossingId);
+        _borderCrossingService.setLastCrossingTime();
+
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context,
+              'Border waiting timer started.',
+              seconds: 10,
+              customColor: Colors.deepPurple[400]
+          );
+        }
+      }
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
+      }
+    }
   }
   
-  void _crossedBorder() {
-    // TODO
-    // if id == null return
-    _insideGeofence = false;
-    // api call (if error -> set to true ^)
-    // set shared prefs + time
-    _activeCrossingId = null;
+  Future<void> _crossedBorder() async {
+    try {
+      if (_activeCrossingId != null) {
+        await _borderCrossingService.crossedBorder(_activeCrossingId!);
+        print('BRISI SVE');
+        _insideGeofence = false;
+        _activeCrossingId = null;
+        _lastCrossingTime = DateTime.now();
+
+        _borderCrossingService.setLastCrossingTime();
+        _borderCrossingService.clearCrossingData();
+
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context,
+              'You have crossed the border. Have a nice trip!',
+              seconds: 10,
+              customColor: Colors.deepPurple[400]
+          );
+        }
+      }
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
+        }
+      }
+    }
   }
 
   void _recenterMap() {

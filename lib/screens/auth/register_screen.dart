@@ -34,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       await _authService.register(email, password, repeatPassword, firstName, lastName);
       if (mounted) {
-        SnackbarUtils.showSnackbar(context, 'Registered successfully. You may login.', Colors.deepPurple[400]);
+        SnackbarUtils.showSnackbar(context, 'Registered successfully. You may login.', customColor: Colors.deepPurple[400]);
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
