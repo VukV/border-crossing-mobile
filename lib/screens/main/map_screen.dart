@@ -48,10 +48,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    _borderCrossingService.clearCrossingData(); // TODO delete
     _loadAutomaticMode();
     _requestLocationPermission();
     _loadCrossingData();
     _getActiveBorder();
+    _lastCrossingTime = null; // TODO delete
   }
 
   @override
