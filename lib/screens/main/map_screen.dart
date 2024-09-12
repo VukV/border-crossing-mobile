@@ -4,6 +4,7 @@ import 'package:border_crossing_mobile/models/error.dart';
 import 'package:border_crossing_mobile/screens/main/border_times/border_times_screen.dart';
 import 'package:border_crossing_mobile/services/border_crossing_service.dart';
 import 'package:border_crossing_mobile/services/border_service.dart';
+import 'package:border_crossing_mobile/services/settings_service.dart';
 import 'package:border_crossing_mobile/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,6 +21,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
   StreamSubscription<Position>? _positionStreamSubscription;
+  final SettingsService _settingsService = SettingsService();
   final BorderService _borderService = BorderService();
   final BorderCrossingService _borderCrossingService = BorderCrossingService();
 
@@ -34,16 +36,19 @@ class _MapScreenState extends State<MapScreen> {
   bool _isUserInteracting = false;
   bool _isLoading = true;
   bool _bordersLoaded = false;
+  bool _isAutomaticMode = false;
   Set<Marker> _markers = {};
 
   bool _insideGeofence = false;
   String? _activeBorderId;
+  BorderCheckpoint? _activeBorder;
   String? _activeCrossingId;
   DateTime? _lastCrossingTime;
 
   @override
   void initState() {
     super.initState();
+    _loadAutomaticMode();
     _requestLocationPermission();
     _loadCrossingData();
   }
@@ -69,6 +74,13 @@ class _MapScreenState extends State<MapScreen> {
         }
       });
     }
+  }
+
+  Future<void> _loadAutomaticMode() async {
+    final isAutomaticMode = await _settingsService.getAutomaticMode();
+    setState(() {
+      _isAutomaticMode = isAutomaticMode;
+    });
   }
 
   Future<void> _loadCrossingData() async {
@@ -151,7 +163,7 @@ class _MapScreenState extends State<MapScreen> {
     try {
       _positionStreamSubscription = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.best,
+          accuracy: LocationAccuracy.high,
           distanceFilter: 10,
         ),
       ).listen((Position position) {
@@ -164,10 +176,13 @@ class _MapScreenState extends State<MapScreen> {
         if (_currentPosition != null && !_bordersLoaded) {
           _loadBorders(); // don't load borders every time
         }
-        if (_activeBorderId != null) {
-          _validateCrossingData(position);
+
+        if (_isAutomaticMode) {
+          if (_activeBorderId != null) {
+            _validateCrossingData(position);
+          }
+          _checkGeofence(position);
         }
-        _checkGeofence(position);
 
         if (!_isUserInteracting) {
           if (_lastPosition != currentLatLng) {
@@ -288,7 +303,7 @@ class _MapScreenState extends State<MapScreen> {
                   target: _currentPosition != null
                       ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
                       : const LatLng(44.80241600, 20.46560100), // Default to Belgrade
-                  zoom: 12,
+                  zoom: _mapZoom,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
@@ -296,7 +311,7 @@ class _MapScreenState extends State<MapScreen> {
                     _mapController!.animateCamera(CameraUpdate.newCameraPosition(
                       CameraPosition(
                         target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                        zoom: 15,
+                        zoom: _mapZoom,
                       ),
                     ));
                   }
