@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:border_crossing_mobile/constants/api_endpoints.dart';
+import 'package:border_crossing_mobile/constants/shared_preference_keys.dart';
 import 'package:border_crossing_mobile/models/border/border_analytics.dart';
 import 'package:border_crossing_mobile/models/border/border_crossing.dart';
 import 'package:border_crossing_mobile/models/error.dart';
@@ -11,10 +12,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BorderCrossingService {
-  static const String _lastCrossingTimeKey = 'lastCrossingTime';
-  static const String _insideGeofenceKey = 'lastCrossingTime';
-  static const String _activeBorderIdKey = 'activeBorderId';
-  static const String _activeCrossingIdKey = 'activeCrossingId';
 
   final AuthService _authService = AuthService();
 
@@ -23,12 +20,12 @@ class BorderCrossingService {
     DateTime now = DateTime.now();
     String formattedTime = now.toIso8601String();
 
-    await prefs.setString(_lastCrossingTimeKey, formattedTime);
+    await prefs.setString(SharedPreferenceKeys.lastCrossingTimeKey, formattedTime);
   }
 
   Future<DateTime?> getLastCrossingTime() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? lastCrossingTimeStr = prefs.getString(_lastCrossingTimeKey);
+    String? lastCrossingTimeStr = prefs.getString(SharedPreferenceKeys.lastCrossingTimeKey);
 
     if (lastCrossingTimeStr != null) {
       return DateTime.parse(lastCrossingTimeStr);
@@ -38,39 +35,39 @@ class BorderCrossingService {
 
   Future<void> setInsideGeofence(bool isInside) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_insideGeofenceKey, isInside);
+    await prefs.setBool(SharedPreferenceKeys.insideGeofenceKey, isInside);
   }
 
   Future<bool> getInsideGeofence() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_insideGeofenceKey) ?? false;
+    return prefs.getBool(SharedPreferenceKeys.insideGeofenceKey) ?? false;
   }
 
   Future<void> setActiveCrossingId(String crossingId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_activeCrossingIdKey, crossingId);
+    await prefs.setString(SharedPreferenceKeys.activeCrossingIdKey, crossingId);
   }
 
   Future<String?> getActiveCrossingId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_activeCrossingIdKey);
+    return prefs.getString(SharedPreferenceKeys.activeCrossingIdKey);
   }
 
   Future<void> setActiveBorderId(String borderId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_activeBorderIdKey, borderId);
+    await prefs.setString(SharedPreferenceKeys.activeBorderIdKey, borderId);
   }
 
   Future<String?> getActiveBorderId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_activeBorderIdKey);
+    return prefs.getString(SharedPreferenceKeys.activeBorderIdKey);
   }
 
   Future<void> clearCrossingData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_insideGeofenceKey);
-    await prefs.remove(_activeCrossingIdKey);
-    await prefs.remove(_activeBorderIdKey);
+    await prefs.remove(SharedPreferenceKeys.insideGeofenceKey);
+    await prefs.remove(SharedPreferenceKeys.activeCrossingIdKey);
+    await prefs.remove(SharedPreferenceKeys.activeBorderIdKey);
   }
 
   Future<List<BorderCrossing>?> getRecentCrossings(String borderId) async {
