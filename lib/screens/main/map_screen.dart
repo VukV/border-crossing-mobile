@@ -51,6 +51,7 @@ class _MapScreenState extends State<MapScreen> {
     _loadAutomaticMode();
     _requestLocationPermission();
     _loadCrossingData();
+    _getActiveBorder();
   }
 
   @override
@@ -92,8 +93,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _validateCrossingData(Position position) async {
     try {
-      final border = await _borderService.getBorderCheckpoint(_activeBorderId!);
-
+      final border = _activeBorder;
       if (border != null) {
         final double distance = Geolocator.distanceBetween(
           position.latitude,
@@ -154,6 +154,26 @@ class _MapScreenState extends State<MapScreen> {
       } else {
         if (mounted) {
           SnackbarUtils.showSnackbar(context, 'Failed to load border checkpoints.');
+        }
+      }
+    }
+  }
+
+  Future<void> _getActiveBorder() async {
+    if (_activeBorderId == null) {
+      return;
+    }
+    try {
+      final activeBorder = await _borderService.getBorderCheckpoint(_activeBorderId!);
+      _activeBorder = activeBorder;
+    } catch (e) {
+      if (e is BCError) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, e.message);
+        }
+      } else {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
         }
       }
     }
