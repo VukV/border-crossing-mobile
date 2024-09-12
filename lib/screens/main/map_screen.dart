@@ -248,7 +248,7 @@ class _MapScreenState extends State<MapScreen> {
         _enteredBorder(border.id);
       }
 
-      if (_insideGeofence && userPosition.speed < 30 && _activeBorderId == border.id) {
+      if (_insideGeofence && userPosition.speed < 2 && _activeBorderId == border.id) {
         _startCrossing(border.id);
       }
 
