@@ -26,6 +26,7 @@ class _MapScreenState extends State<MapScreen> {
   final BorderCrossingService _borderCrossingService = BorderCrossingService();
 
   Position? _currentPosition;
+  Position? _bordersLoadingPosition;
   LatLng? _lastPosition;
 
   Timer? _cameraUpdateTimer;
@@ -191,12 +192,15 @@ class _MapScreenState extends State<MapScreen> {
         final currentLatLng = LatLng(position.latitude, position.longitude);
         setState(() {
           _currentPosition = position;
+          _bordersLoadingPosition ??= position;
           _isLoading = false;
         });
 
         if (_currentPosition != null && !_bordersLoaded) {
           _loadBorders(); // don't load borders every time
         }
+
+        _loadBordersEvery100Kilometers();
 
         if (_isAutomaticMode) {
           if (_activeBorderId != null) {
@@ -335,6 +339,21 @@ class _MapScreenState extends State<MapScreen> {
         if (mounted) {
           SnackbarUtils.showSnackbar(context, 'An unknown error occurred.');
         }
+      }
+    }
+  }
+
+  void _loadBordersEvery100Kilometers() {
+    if (_bordersLoadingPosition != null && _currentPosition != null) {
+      final double distance = Geolocator.distanceBetween(
+        _bordersLoadingPosition!.latitude,
+        _bordersLoadingPosition!.longitude,
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
+
+      if (distance <= 100000) {
+        _loadBorders();
       }
     }
   }
