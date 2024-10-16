@@ -1,16 +1,15 @@
-# border_crossing_mobile
+# Border Crossing - Mobile App
 
-Master thesis mobile application project
+This is the mobile application for the Border Crossing System, developed as part of a master's thesis project. The app is built using Flutter framework and provides a user-friendly interface for tracking and measuring waiting times at border checkpoints. A key feature of the app is **geofencing**, which enables automatic detection of border crossings and real-time measurement of waiting times.
 
-## Getting Started
+## Project Overview
 
-This project is a starting point for a Flutter application.
+- **Flutter**: Cross-platform mobile app framework.
+- **Geofencing**: Automatically detects when a user approaches or crosses a border and measures waiting times.
+- **Google Maps**: Used for real-time movement tracking and displaying border checkpoint locations.
+- **Real-Time Insights**: Get up-to-date information and analytics about waiting times at borders.
+- API integration with the backend (Spring Boot) for real-time border data and analytics.
 
-A few resources to get you started if this is your first Flutter project:
+<br>
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Backend side here: https://github.com/VukV/border-crossing-be
